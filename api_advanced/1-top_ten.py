@@ -5,12 +5,34 @@ import requests
 
 def top_ten(subreddit):
     """Fetch and print titles of top 10 hot posts"""
+    if not subreddit or not isinstance(subreddit, str):
+        print(None)
+        return
+    
     headers = {'User-Agent': 'AuroreRedditScript/1.0'}
     url = "https://www.reddit.com/r/{}/hot.json?limit=10".format(subreddit)
-
+    
     try:
         response = requests.get(url, headers=headers, allow_redirects=False)
     except requests.RequestException:
         print(None)
-        retur
-
+        return
+    
+    if response.status_code != 200:
+        print(None)
+        return
+    
+    try:
+        data = response.json().get("data", {}).get("children", [])
+    except (ValueError, KeyError):
+        print(None)
+        return
+    
+    if not data:
+        print(None)
+        return
+    
+    for post in data:
+        title = post.get("data", {}).get("title")
+        if title:
+            print(title)
