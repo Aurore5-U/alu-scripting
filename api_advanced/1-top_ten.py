@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 """
- A function that queries the Reddit API and prints the titles.
+A function that queries the Reddit API and prints the top 10 hot post titles
+for a given subreddit.
 """
 
 import requests
@@ -11,16 +12,24 @@ def top_ten(subreddit):
 
     url = "https://www.reddit.com/r/{}/hot.json?limit=10".format(subreddit)
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
-    response = requests.get(url, headers=headers)
+
+    try:
+        response = requests.get(url, headers=headers, allow_redirects=False)
+    except requests.RequestException:
+        print("None")
+        return
 
     if response.status_code != 200:
-        print(None)
+        print("None")
         return
 
     data = response.json().get("data")
-    if data is None or len(data.get("children")) == 0:
-        print(None)
+    if data is None or len(data.get("children", [])) == 0:
+        print("None")
         return
 
     for child in data.get("children"):
-        print(child.get("data").get("title"))
+        title = child.get("data", {}).get("title")
+        if title:
+            print(title)
+
